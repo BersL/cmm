@@ -1,0 +1,53 @@
+flex_src  = $(shell find $(bison_dir) -name "*.l")
+bison_src = $(shell find $(bison_dir) -name "*.y")
+
+scanner_header := $(bison_dir)/cmmscanner.h
+driver_src := $(bison_dir)/cmmdriver.cc
+# Generated
+scanner_src := $(bison_dir)/cmmscanner.cc
+parser_src := $(bison_dir)/cmmparser.cc
+parser_header := $(bison_dir)/cmmparser.h
+# obj
+scanner_obj := $(obj_dir)/cmmscanner.o
+parser_obj := $(obj_dir)/cmmparser.o
+driver_obj := $(obj_dir)/cmmdriver.o
+
+bison_obj: $(scanner_obj) $(parser_obj) $(driver_obj)
+
+$(scanner_src): $(flex_src)
+	@printf	"[%3d%%] " $$(($(cnt) * 100 / ($(obj_count)+1)))
+	$(eval cnt = $(shell echo $$(($(cnt)+1))))
+	@echo "\033[32mGenerating $(scanner_src) with flex\033[0m"
+	@$(flex) -o $@ $<
+
+$(parser_src): $(bison_src)
+	@printf	"[%3d%%] " $$(($(cnt) * 100 / ($(obj_count)+1)))
+	$(eval cnt = $(shell echo $$(($(cnt)+1))))
+	@echo "\033[32mGenerating $(parser_header) $(parser_src) with bison\033[0m"
+	@$(bison) -Wno-other -o $@ $<
+
+$(scanner_obj): $(scanner_src) $(parser_src)
+	@printf	"[%3d%%] " $$(($(cnt) * 100 / ($(obj_count)+1)))
+	$(eval cnt = $(shell echo $$(($(cnt)+1))))
+	@echo "\033[32mBuilding object $@...\033[0m"
+	@$(cc) $(CXXFLAGS) -g $(INC) -c $< -o $@
+
+$(parser_obj): $(parser_src)
+	@printf	"[%3d%%] " $$(($(cnt) * 100 / ($(obj_count)+1)))
+	$(eval cnt = $(shell echo $$(($(cnt)+1))))
+	@echo "\033[32mBuilding object $@...\033[0m"
+	@$(cc) $(CXXFLAGS) -g $(INC) -c $< -o $@
+
+$(driver_obj): $(driver_src)
+	@printf	"[%3d%%] " $$(($(cnt) * 100 / ($(obj_count)+1)))
+	$(eval cnt = $(shell echo $$(($(cnt)+1))))
+	@echo "\033[32mBuilding object $@...\033[0m"
+	@$(cc) $(CXXFLAGS) -g $(INC) -c $< -o $@
+
+bison_prep:
+	$(eval obj_count = $(shell echo $$(($(obj_count)+5))))
+
+clean-bison:
+	@echo "\033[1;31mRemoving bison targets...\033[0m"
+	@-rm -rf $(scanner_src) $(parser_src) $(parser_header) 2>/dev/null
+	@echo "Removed"

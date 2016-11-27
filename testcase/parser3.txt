@@ -1,0 +1,22 @@
+int test(int a) {
+    3;
+    if(-1)
+        while(1)
+            return 10;
+    else if(0)
+        return 100;
+    else
+        return 9;
+
+    if(1){
+        return 1;
+    while(2){
+        10;
+    }
+    if(2)
+        return 2;
+    else
+        return 0.03;
+    }
+    return 1;
+}

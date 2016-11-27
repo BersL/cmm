@@ -1,0 +1,7 @@
+int a;
+int a1, a2, a3;
+// This is test line;
+struct test {
+    int m;
+    float n,o,p;
+};
