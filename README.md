@@ -2,8 +2,8 @@
 A C-- Language Complier
 
 # Dependency
-flex++ 2.5 or later
-bison++ 3.0.4 or later
+`flex++` 2.5 or later<br\>
+`bison++` 3.0.4 or later
 
 # Build
 run
