@@ -17,6 +17,7 @@ class ControlIO {
 	int x, y;
 	std::vector<int> line;
 	std::string esc;
+	std::vector<std::string> buffer;
 public:
 	int tabwidth;
 	struct TextAttrib {

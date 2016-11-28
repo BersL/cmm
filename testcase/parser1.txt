@@ -1,11 +1,5 @@
-int a[10];
-struct test{
-    int a = 0;
-};
-struct test n;
 int main(int a) {
     int c = 0;
-    int a[10] = 5;
-    struct test m;
+    int a[10] = 5m;
     return 0;
 }

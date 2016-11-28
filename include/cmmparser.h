@@ -169,31 +169,17 @@ namespace cmm {
         FLOAT = 259,
         ID = 260,
         TYPE = 261,
-        SEMI = 262,
-        COMMA = 263,
-        ASSIGNOP = 264,
-        RELOP = 265,
-        PLUS = 266,
-        MINUS = 267,
-        STAR = 268,
-        DIV = 269,
-        AND = 270,
-        OR = 271,
-        DOT = 272,
-        NOT = 273,
-        LP = 274,
-        RP = 275,
-        LB = 276,
-        RB = 277,
-        LC = 278,
-        RC = 279,
-        STRUCT = 280,
-        RETURN = 281,
-        IF = 282,
-        ELSE = 283,
-        WHILE = 284,
-        UMINUS = 285,
-        LOWER_THAN_ELSE = 286
+        VOID = 262,
+        RELOP = 263,
+        AND = 264,
+        OR = 265,
+        STRUCT = 266,
+        RETURN = 267,
+        IF = 268,
+        ELSE = 269,
+        WHILE = 270,
+        UMINUS = 271,
+        LOWER_THAN_ELSE = 272
       };
     };
 
@@ -379,7 +365,7 @@ namespace cmm {
   // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
   // positive, shift that token.  If negative, reduce the rule whose
   // number is the opposite.  If YYTABLE_NINF, syntax error.
-  static const unsigned char yytable_[];
+  static const signed char yytable_[];
 
   static const signed char yycheck_[];
 
@@ -501,12 +487,12 @@ namespace cmm {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 261,     ///< Last index in yytable_.
+      yylast_ = 315,     ///< Last index in yytable_.
       yynnts_ = 20,  ///< Number of nonterminal symbols.
-      yyfinal_ = 12, ///< Termination state number.
+      yyfinal_ = 14, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 32  ///< Number of tokens.
+      yyntokens_ = 33  ///< Number of tokens.
     };
 
 
@@ -517,7 +503,7 @@ namespace cmm {
 
 
 } // cmm
-#line 521 "include/cmmparser.h" // lalr1.cc:392
+#line 507 "include/cmmparser.h" // lalr1.cc:392
 
 
 

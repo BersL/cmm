@@ -1,8 +1,9 @@
-#include "ControlIO.h"
 #include <string>
 #include <term.h>
 #include <sstream>
 #include <algorithm>
+#include "strutils.h"
+#include "ControlIO.h"
 
 void split(const std::string& s, std::vector<std::string>& v, const char c);
 
@@ -183,19 +184,11 @@ bool strlen_cmp(std::string a, std::string b) {
 	return a.size() < b.size();
 }
 
-void replace(std::string& str, const std::string& from, const std::string& to) {
-	size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length();
-    }
-}
-
 ControlIO& operator<<(ControlIO& io, const std::string _str) {
 	std::vector<std::string> str_lines;
 	std::string str(_str);
-	replace(str, "\t", std::string(io.tabwidth, ' '));
-	split(str, str_lines, '\n');
+	str_replace(str, "\t", std::string(io.tabwidth, ' '));
+	str_split(str, str_lines, '\n');
 
 	for(int i = 0; i<str_lines.size(); ++i) {
 		if(i>0) {
@@ -207,7 +200,7 @@ ControlIO& operator<<(ControlIO& io, const std::string _str) {
 		}
 		std::string &line = str_lines[i];
 		std::vector<std::string> line_sub;
-		split(line, line_sub, '\r');
+		str_split(line, line_sub, '\r');
 		int maxlength = std::max_element(line_sub.begin(), line_sub.end(), strlen_cmp)->size();
 		if(line_sub.size() > 1)  {
 			io.x = 0;
@@ -218,24 +211,6 @@ ControlIO& operator<<(ControlIO& io, const std::string _str) {
 
 	std::cout<<io.esc + "m"<<str<<std::flush;
 	return io;
-}
-
-void split(const std::string& s, std::vector<std::string>& v, const char c)
-{
-	std::string::size_type pos1, pos2;
-  	pos2 = s.find(c);
-	pos1 = 0;
-	while(std::string::npos != pos2) {
-    	v.push_back(s.substr(pos1, pos2-pos1));
-    	pos1 = pos2 + 1;
-    	pos2 = s.find(c, pos1);
-	}
-	if(pos1 != s.length())
-		v.push_back(s.substr(pos1));
-	if(s[s.size() - 1] == c)
-		v.push_back("");
-	if(v.size() == 0)
-		v.push_back(s);
 }
 
 ControlIO& operator<<(ControlIO& io, const int ival) {

@@ -62,9 +62,8 @@
 %token	END	     0	"end of file"
 %token <int_value> INT
 %token <float_value> FLOAT
-%token <str_value> ID TYPE
-%token SEMI COMMA ASSIGNOP RELOP PLUS MINUS STAR DIV AND OR DOT NOT
-%token LP RP LB RB LC RC
+%token <str_value> ID TYPE VOID
+%token RELOP AND OR
 %token STRUCT RETURN IF ELSE WHILE
 
 %type <identfier> identifier
@@ -89,9 +88,9 @@
 %destructor { delete $$; } variable_declaration function_declaration parameter_list parameter_declaration block block_statement
 %destructor { delete $$; } block_declaration_list block_declaration block_variable_list block_variable expression argument_list
 
-%left ASSIGNOP
-%left PLUS MINUS
-%left STAR
+%left '='
+%left '+' '-'
+%left '*'
 %left UMINUS
 
 %nonassoc LOWER_THAN_ELSE
@@ -152,7 +151,7 @@ specifier :
 	;
 
 variable_declaration_statement:
-	specifier variable_declaration_list SEMI {
+	specifier variable_declaration_list ';' {
 		$$ = new cmm::NVariableDecStatement($1, $2);
 	}
 	// Done
@@ -163,7 +162,7 @@ variable_declaration_list :
 		$$ = new std::deque<cmm::NVariableDeclaration*>;
 		$$->push_front($1);
 	}
-	|	variable_declaration COMMA variable_declaration_list {
+	|	variable_declaration ',' variable_declaration_list {
 		$3->push_front($1);
 		$$ = $3;
 	}
@@ -171,7 +170,7 @@ variable_declaration_list :
 	;
 
 variable_declaration :
-	variable ASSIGNOP expression {
+	variable '=' expression {
 		$$->assignmentExp = $3;
 		$$ = $1;
 	}
@@ -185,10 +184,10 @@ variable :
 	identifier {
 		$$ = new cmm::NVariableDeclaration($1);
 	}
-	|	identifier LB INT RB {
+	|	identifier '[' INT ']' {
 		$$ = new cmm::NVariableDeclaration($1, $3);
 	}
-	|	identifier DOT identifier {
+	|	identifier '.' identifier {
 		$$ = new cmm::NVariableDeclaration($1, $3);
 	}
 	// Done
@@ -207,7 +206,7 @@ variable_declaration_stmt_list :
 	;
 
 struct_declaration_statement :
-	STRUCT identifier LC variable_declaration_stmt_list RC SEMI {
+	STRUCT identifier '{' variable_declaration_stmt_list '}' ';' {
 		$$ = new cmm::NStructStatement($2, $4);
 	}
 	// Done.
@@ -221,20 +220,26 @@ identifier :
 	;
 
 function_declaration_statement:
-	specifier identifier LP parameter_list RP block {
+	specifier identifier '(' parameter_list ')' block {
 		$$ = new NFunctionDecStatement($1, $2, $4, $6);
+	}
+	| VOID identifier '(' parameter_list ')' block {
+		$$ = new NFunctionDecStatement(NULL, $2, $4, $6);
 	}
 	// Done
 	;
 
 parameter_list : 
-	parameter_declaration COMMA parameter_list {
+	parameter_declaration ',' parameter_list {
 		$3->push_front($1);
 		$$ = $3;
 	}
 	|	parameter_declaration {
 		$$ = new std::deque<cmm::NFunctionParameter*>;
 		$$->push_front($1);
+	}
+	| VOID {
+		$$ = NULL;
 	}
 	| {
 		$$ = NULL;
@@ -250,13 +255,13 @@ parameter_declaration :
 	;
 
 block : 
-	LC variable_declaration_stmt_list block_statement_list RC {
+	'{' variable_declaration_stmt_list block_statement_list '}' {
 		$$ = new NBlock($2, $3);
 	}
-	|	LC block_statement_list RC {
+	|	'{' block_statement_list '}' {
 		$$ = new NBlock($2);
 	}
-	|	LC RC {
+	|	'{' '}' {
 		$$ = new NBlock();
 	}
 	;
@@ -274,42 +279,42 @@ block_statement_list :
 
 
 block_statement :	
-	expression SEMI {
+	expression ';' {
 		$$ = new NExpressionStatement($1);
 	}
 	|	block {
 		$$ = new NBlockStatement($1);
 	}
-	|	RETURN expression SEMI {
+	|	RETURN expression ';' {
 		$$ = new NReturnStatement($2);
 	}
-	|	IF LP expression RP block_statement %prec LOWER_THAN_ELSE {
+	|	IF '(' expression ')' block_statement %prec LOWER_THAN_ELSE {
 		$$ = new NIfStatement($3, $5, NULL);
 	}
-	|	IF LP expression RP block_statement ELSE block_statement {
+	|	IF '(' expression ')' block_statement ELSE block_statement {
 		$$ = new NIfStatement($3, $5, $7);
 	}
-	|	WHILE LP expression RP block_statement {
+	|	WHILE '(' expression ')' block_statement {
 		$$ = new NWhileStatement($3, $5);
 	}
 	;
 
 expression : 
-	expression ASSIGNOP expression
+	expression '=' expression
 	|	expression AND expression
 	|	expression OR expression
 	|	expression RELOP expression
-	|	expression PLUS expression
-	|	expression MINUS expression
-	|	expression STAR expression
-	|	expression DIV expression
-	|	LP expression RP
-	|	MINUS expression %prec UMINUS
-	|	NOT expression
-	|	identifier LP argument_list RP
-	|	identifier LP RP
-	|	expression LB expression RB
-	|	expression DOT identifier
+	|	expression '+' expression
+	|	expression '-' expression
+	|	expression '*' expression
+	|	expression '/' expression
+	|	'(' expression ')'
+	|	'-' expression %prec UMINUS
+	|	'!' expression
+	|	identifier '(' argument_list ')'
+	|	identifier '(' ')'
+	|	expression '[' expression ']'
+	|	expression '.' identifier
 	|	identifier
 	|	INT {
 		$$ = new NInteger($1);
@@ -317,10 +322,13 @@ expression :
 	|	FLOAT {
 		$$ = new NFloat($1);
 	}
+	|	{
+		$$ = NULL;
+	}
 	;
 
 argument_list : 
-	expression COMMA argument_list
+	expression ',' argument_list
 	|	expression
 	;
 

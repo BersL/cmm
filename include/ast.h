@@ -267,6 +267,12 @@ public:
 	virtual ~NInteger() {}
 };
 
+// class NVariable: public NExpression {
+// public:
+// 	NIdentifier *identifier;
+
+// }
+
 
 // class NAssignmentExpression: public NExpression {
 // public:

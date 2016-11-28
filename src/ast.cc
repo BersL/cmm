@@ -129,7 +129,9 @@ void NFunctionDecStatement::print(AST_OS &os, unsigned int depth = 0, bool detai
 	this->depth_print(os, depth);
 	os<< (detail ? "▼" : "▶") <<" NFunctionDecStatement"<<std::endl;
 	if(detail) {
-		this->return_type->print(os, depth+1);
+		if(this->return_type) {
+			this->return_type->print(os, depth+1);
+		}
 		this->identifier->print(os, depth+1);
 		for (std::deque<NFunctionParameter*>::const_iterator i = this->param_list.begin(); i != this->param_list.end(); ++i){
 			(*i)->print(os, depth+1);
@@ -168,8 +170,10 @@ void NBlockStatement::print(AST_OS &os, unsigned int depth = 0, bool detail = 1)
 
 void NReturnStatement::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
 	this->depth_print(os, depth);
-	os<<"▼ NReturnStatement"<<std::endl;
-	this->exp->print(os, depth+1);
+	os<<(this->exp ? "▼" : "▶")<<" NReturnStatement"<<std::endl;
+	if(this->exp) {
+		this->exp->print(os, depth+1);
+	}
 }
 
 void NIfStatement::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {

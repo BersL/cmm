@@ -2,15 +2,18 @@
 #include <iostream>
 #include <string>
 #include <signal.h>
+#include <stdlib.h>
 
 #include "cmmdriver.h"
 #include "ast.h"
 
 void handle_int(int sig);
+void reset_terminal(void);
 
 static ControlIO conio;
 
 int main(int argc, char **argv) {
+	atexit(reset_terminal);
 	signal(SIGINT, handle_int);
 
 	cmm::NProgram program;
@@ -53,9 +56,13 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-void handle_int(int sig) {
+void reset_terminal(void) {
 	conio.movetoend();
 	conio.tty_reset();
-	std::cout<<std::endl<<"\033[?25h\033[1;31m"<<"Keyboard Interrupt.\033[0m"<<std::endl;
+	std::cout<<"\033[?25h";
+}
+
+void handle_int(int sig) {
+	std::cout<<std::endl<<"\033[1;31m"<<"Keyboard Interrupt.\033[0m"<<std::endl;
 	exit(2);
 }
