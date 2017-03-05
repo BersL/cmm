@@ -73,21 +73,31 @@ void NIdentifier::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) con
 	os<<"▶ NIdentifier: "<<ControlIO::Bold<<this->identifier<<ControlIO::Reset<<std::endl;
 }
 
-void NStatement::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
-	this->depth_print(os, depth);
-	os<<"▶ NStatement"<<std::endl;
-}
-
 void NExpression::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
 	this->depth_print(os, depth);
-	os<<"▶ NExpression"<<std::endl;
+	os<<"▼ NExpression"<<std::endl;
+	if(this->identifier) {
+		this->identifier->print(os, depth+1);
+	}
+	if(!this->member.empty()) {
+		this->depth_print(os, depth+1);
+		os<<"┗━━Member:"<<std::endl;
+		for (std::deque<NIdentifier*>::const_iterator i = this->member.begin(); i != this->member.end(); ++i){
+			(*i)->print(os, depth+2);
+		}
+	}
+	if(this->index) {
+		this->depth_print(os, depth+1);
+		os<<"┗━━Index:"<<std::endl;
+		this->index->print(os, depth+2);
+	}
 }
 
 void NVariableDecStatement::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
 	this->depth_print(os, depth);
 	os<< (detail ? "▼" : "▶") <<" NVariableDeclarationStatement"<<std::endl;
 	if(detail) {
-		this->type->print(os, depth+1, 1);
+		this->declaration_list[0]->type->print(os, depth+1, 1);
 		for (std::deque<NVariableDeclaration*>::const_iterator i = this->declaration_list.begin(); i != this->declaration_list.end(); ++i){
 			(*i)->print(os, depth+1, 1);
 		}
@@ -102,27 +112,17 @@ void NSpecifier::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) cons
 void NVariableDeclaration::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
 	this->depth_print(os, depth);
 	os<<"▼ NVariableDeclaration"<<std::endl;
+	this->type->print(os, depth+1);
 	this->identifier->print(os, depth+1);
 	if(this->count > 1) {
-		this->depth_print(os, depth+2);
-		os<<"Dimension: "<<this->count<<std::endl;
-	}
-	if(this->member && this->member->identifier != "") {
-		this->depth_print(os, depth+2);
-		os<<"Member: "<<this->member->identifier<<std::endl;
+		this->depth_print(os, depth+1);
+		os<<"┗━━Dimension: "<<this->count<<std::endl;
 	}
 	if(this->assignmentExp) {
 		this->depth_print(os, depth+1);
-		os<<"Assignment:"<<std::endl;
+		os<<"┗━━Assignment:"<<std::endl;
 		this->assignmentExp->print(os, depth+2);
 	}
-}
-
-void NFunctionParameter::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
-	this->depth_print(os, depth);
-	os<<"▼ NFunctionParameter"<<std::endl;
-	this->type->print(os, depth+1);
-	this->identifier->print(os, depth+1);
 }
 
 void NFunctionDecStatement::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
@@ -133,7 +133,7 @@ void NFunctionDecStatement::print(AST_OS &os, unsigned int depth = 0, bool detai
 			this->return_type->print(os, depth+1);
 		}
 		this->identifier->print(os, depth+1);
-		for (std::deque<NFunctionParameter*>::const_iterator i = this->param_list.begin(); i != this->param_list.end(); ++i){
+		for (std::deque<NVariableDeclaration*>::const_iterator i = this->param_list.begin(); i != this->param_list.end(); ++i){
 			(*i)->print(os, depth+1);
 		}
 		this->block->print(os, depth+1, 1);
@@ -157,10 +157,10 @@ void NExpressionStatement::print(AST_OS &os, unsigned int depth = 0, bool detail
 	this->exp->print(os, depth+1);
 }
 
-void NInBlockStatement::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
-	this->depth_print(os, depth);
-	os<<"▶ NInBlockStatement"<<std::endl;
-}
+// void NInBlockStatement::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
+// 	this->depth_print(os, depth);
+// 	os<<"▶ NInBlockStatement"<<std::endl;
+// }
 
 void NBlockStatement::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
 	// this->depth_print(os, depth);
@@ -187,7 +187,7 @@ void NIfStatement::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) co
 	}
 	if(this->else_stmt) {
 		this->depth_print(os, depth);
-		os<<"┗━ ElseStatement"<<std::endl;
+		os<<"┗━━ElseStatement"<<std::endl;
 		this->else_stmt->print(os, depth+1);
 	}
 }
@@ -214,14 +214,124 @@ void NBlock::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
 	}
 }
 
-void NFloat::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
+
+void NLiteral::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
 	this->depth_print(os, depth);
-	os<<"▶ NFloat: "<<ControlIO::Bold<<this->value<<ControlIO::Reset<<std::endl;
+	if(this->type == NLiteral::Int) {
+		os<<"▶ NLiteral - Int"<<ControlIO::Bold<<this->value.int_val<<ControlIO::Reset<<std::endl;
+	}else if(this->type == NLiteral::Double) {
+		os<<"▶ NLiteral - Double"<<ControlIO::Bold;
+		std::cout<<this->value.double_val;
+		os<<ControlIO::Reset<<std::endl;
+	}
+
 }
 
-void NInteger::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
-	this->depth_print(os, depth);
-	os<<"▶ NInteger: "<<ControlIO::Bold<<this->value<<ControlIO::Reset<<std::endl;
+std::string NBinaryExpression::oprstr() const {
+	switch (this->opr){
+	case Add:	return "+";	case Sub:	return "-";
+	case Mul:	return "*";	case Div:	return "/";
+	case And:	return "&&";case Or:	return "||";
+	case Equal:	return "==";case Less:	return "<";
+	case NotEqual:						return "!=";
+	case Greater:						return ">";
+	case GreaterOrEqual:				return ">=";
+	case LessOrEqual:					return "<=";
+	default:							return "";
+	}
 }
+
+void NBinaryExpression::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
+	this->depth_print(os, depth);
+	os<<"▼ NBinaryExpression"<<std::endl;
+	this->lhs->print(os, depth+1);
+	this->depth_print(os, depth+1);
+	os<<"┣━━Operator: "<<this->oprstr()<<std::endl;
+	this->rhs->print(os, depth+1);
+}
+
+std::string NUnaryExpression::oprstr() const {
+	switch (this->opr){
+	case Neg:	return "-";	case Not:	return "!";
+	default:	return "";
+	}
+}
+
+void NUnaryExpression::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
+	this->depth_print(os, depth);
+	os<<"▼ NUnaryExpression"<<std::endl;
+	this->depth_print(os, depth+1);
+	os<<"┏━━Operator: "<<this->oprstr()<<std::endl;
+	this->opd->print(os, depth+1);
+}
+
+void NAssignmentExpression::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
+	this->depth_print(os, depth);
+	os<<"▼ NAssignmentExpression"<<std::endl;
+	this->lhs->print(os, depth+1);
+	this->rhs->print(os, depth+1);
+}
+
+void NFunctionCallExpression::print(AST_OS &os, unsigned int depth = 0, bool detail = 1) const {
+	this->depth_print(os, depth);
+	os<<"▼ NFunctionCallExpression"<<std::endl;
+	this->identifier->print(os, depth+1);
+	this->depth_print(os, depth+1);
+	os<<"┗━━Arguments:"<<std::endl;
+	for (std::deque<NExpression*>::const_iterator i = this->argument_list.begin(); i != this->argument_list.end(); ++i) {
+		(*i)->print(os, depth+2);
+	}
+}
+
+// -Others
+std::string NStructStatement::member_type(const NIdentifier *member) const {
+	for (std::deque<NVariableDecStatement*>::const_iterator i = this->declaration_statement_list.begin();
+			i != this->declaration_statement_list.end(); ++i) {
+		const NVariableDecStatement* dec_stmt = *i;
+		for (std::deque<NVariableDeclaration*>::const_iterator dec_it = dec_stmt->declaration_list.begin();
+			dec_it != dec_stmt->declaration_list.end(); ++dec_it) {
+			const NVariableDeclaration *declaration = *dec_it;
+			if(declaration->identifier->identifier == member->identifier) {
+				return declaration->type->type;
+			}
+		}
+	}
+	return "";
+}
+
+const NVariableDeclaration* NVariableDecStatement::operator[] (const std::string &identifier) const {
+	const NVariableDeclaration* dec = NULL;
+	for (std::deque<NVariableDeclaration*>::const_iterator i = declaration_list.begin(); i != declaration_list.end(); ++i){
+		if((*i)->identifier->identifier == identifier) {
+			dec = *i;
+		}
+	}
+	return dec;
+}
+
+bool NExpression::isVariable() const {
+	return this->identifier != NULL;
+}
+
+bool NBinaryExpression::isVariable() const {
+	return this->lhs->isVariable();
+}
+
+bool NUnaryExpression::isVariable() const {
+	return this->opd->isVariable();
+}
+
+bool NAssignmentExpression::isVariable() const {
+	return this->lhs->isVariable();
+}
+
+bool NFunctionCallExpression::isVariable() const {
+	return false;
+}
+
+bool NLiteral::isVariable() const {
+	return false;
+}
+
 
 }

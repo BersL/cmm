@@ -1,0 +1,31 @@
+int foo(int bar, int bar2) {
+    return bar*3;
+}
+int main(void) {
+    int b = 4+-5;
+    int c = b-5;
+    int d = foo(c,3);
+    return 0;
+}
+void test(void) {
+    3;
+    if(-1)
+        while(1)
+            return;
+    else if(0)
+        return;
+    else
+        return 9;
+
+    if(1){
+        return 1;
+    while(2){
+        10;
+    }
+    if(2)
+        return 2;
+    else
+        return 0.03;
+    }
+    return 1;
+}

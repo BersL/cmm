@@ -72,7 +72,7 @@ test: $(bin)
 	@printf "\033[36mEnter test file name number: \033[0m"
 	@files_list=($(test_dir)/*);\
 	read test_file_name; \
-	$(bin) $${files_list[test_file_name-1]}
+	$(bin) $(TESTFLAGS) $${files_list[test_file_name-1]}
 
 clean: clean-bison
 	@echo "\033[1;31mRemoving targets...\033[0m"

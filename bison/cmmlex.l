@@ -25,17 +25,15 @@
 #define YY_USER_ACTION  yylloc->columns(yyleng);
 %}
 
-SIGN [+-]?
-DEC {SIGN}(([1-9][0-9]+)|[0-9])
-OCT {SIGN}0[1-7][0-7]*
-HEX {SIGN}0[xX](([1-9a-fA-F][0-9a-fA-F]+)|[0-9a-fA-F])
-EXP {SIGN}[0-9]+([0-9.]*)?([Ee][+-]?[0-9]+)?
-FLOAT {DEC}\.[0-9]+
+DEC (([1-9][0-9]+)|[0-9])
+OCT 0[1-7][0-7]*
+HEX 0[xX](([1-9a-fA-F][0-9a-fA-F]+)|[0-9a-fA-F])
+EXP [0-9]+([0-9.]*)?([Ee][+-]?[0-9]+)?
+DOUBLE {DEC}\.[0-9]+
 ID [a-zA-Z_][[:alnum:]_]{0,31}
-RELOP >|<|>=|<=|!=|==
 AND &&
 OR \|\|
-TYPE int|float
+TYPE int|double
 STRUCT struct
 RETURN return
 VOID void
@@ -81,24 +79,29 @@ COMMENT2 \/\*([^*]*\*[^/])*[^*]*\*\/
 	yylval->int_value = value;
 	return token::INT;
 }
-{FLOAT} {
-	float value = atof(yytext);
-	OUTPUT_TOKEN(FLOAT, value);
-	yylval->float_value = value;
-	return token::FLOAT;
+{DOUBLE} {
+	double value = atof(yytext);
+	OUTPUT_TOKEN(DOUBLE, value);
+	yylval->double_value = value;
+	return token::DOUBLE;
 }
 {EXP} {
-	float value = strtof(yytext, NULL);
-	OUTPUT_TOKEN(FLOAT, value);
-	yylval->float_value = value;
-	return token::FLOAT;
+	double value = strtod(yytext, NULL);
+	OUTPUT_TOKEN(DOUBLE, value);
+	yylval->double_value = value;
+	return token::DOUBLE;
 }
 {ID} {
 	yylval->str_value = new std::string(yytext);
 	OUTPUT_TOKEN(ID, *(yylval->str_value));
 	return token::ID;
 }
-{RELOP} { OUTPUT_TOKEN(RELOP, ""); return token::RELOP; }
+[=][=] { OUTPUT_TOKEN(EQUAL, ""); return token::EQUAL; }
+[!][=] { OUTPUT_TOKEN(NOT_EQUAL, ""); return token::NOT_EQUAL; }
+[>] { OUTPUT_TOKEN(GREATER, ""); return token::GREATER; }
+[<] { OUTPUT_TOKEN(LESS, ""); return token::LESS; }
+[>][=] { OUTPUT_TOKEN(GREATER_OR_EQUAL, ""); return token::GREATER; }
+[<][=] { OUTPUT_TOKEN(LESS_OR_EQUAL, ""); return token::LESS_OR_EQUAL; }
 {AND} { OUTPUT_TOKEN(AND, ""); return token::AND; }
 {OR} { OUTPUT_TOKEN(OR, ""); return token::OR; }
 [;,=.!] { return static_cast<token_type>(*yytext); }

@@ -1,7 +1,13 @@
-int a;
-int a1, a2, a3;
+int a = 0, a2;
 // This is test line;
+/* Comment Test */
 struct test {
     int m;
-    float n,o,p;
+    double n;
 };
+int main(void) {
+    int c = 0;
+    int a[10] = 5;
+    struct test var1;
+    return 0;
+}
